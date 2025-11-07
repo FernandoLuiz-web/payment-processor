@@ -1,4 +1,4 @@
-package org.brava.application.dto;
+package org.brava.shell;
 
 import java.math.BigDecimal;
 
@@ -9,4 +9,5 @@ public record ProcessPaymentCommand(
         BigDecimal amount,
         String currency,
         String description
-) {}
+){
+}

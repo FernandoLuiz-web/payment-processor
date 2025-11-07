@@ -1,11 +1,12 @@
 package org.brava.infrastructure.grpc;
 
 import io.quarkus.grpc.GrpcService;
+import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
-import org.brava.application.dto.PaymentResult;
-import org.brava.application.dto.ProcessPaymentCommand;
-import org.brava.application.usecase.ProcessPaymentUseCase;
+import org.brava.core.Payment;
+import org.brava.shell.ProcessPaymentCommand;
+import org.brava.shell.ProcessPaymentHandler;
 import org.jboss.logging.Logger;
 
 import java.math.BigDecimal;
@@ -16,8 +17,9 @@ public class PaymentGrpcService extends MutinyPaymentServiceGrpc.PaymentServiceI
     private static final Logger LOG = Logger.getLogger(PaymentGrpcService.class);
 
     @Inject
-    ProcessPaymentUseCase processPaymentUseCase;
+    ProcessPaymentHandler handler;
 
+    @Blocking
     @Override
     public Uni<PaymentResponse> processPayment(PaymentRequest request) {
 
@@ -33,12 +35,12 @@ public class PaymentGrpcService extends MutinyPaymentServiceGrpc.PaymentServiceI
         );
 
         return Uni.createFrom().item(() -> {
-            PaymentResult result = processPaymentUseCase.execute(command);
+            Payment result = handler.handle(command);
 
             return PaymentResponse.newBuilder()
-                    .setTransactionId(result.transactionId())
+                    .setTransactionId(result.transactionId() != null ? result.transactionId() : "")
                     .setStatus(result.status().name())
-                    .setMessage(result.message())
+                    .setMessage(result.message() != null ? result.message() : "")
                     .build();
         });
     }

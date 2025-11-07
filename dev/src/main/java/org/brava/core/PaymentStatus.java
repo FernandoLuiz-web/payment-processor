@@ -1,4 +1,4 @@
-package org.brava.domain.enums;
+package org.brava.core;
 
 public enum PaymentStatus {
     PENDING,

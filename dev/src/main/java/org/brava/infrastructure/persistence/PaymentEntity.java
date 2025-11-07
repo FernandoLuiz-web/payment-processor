@@ -1,10 +1,11 @@
-package org.brava.infrastructure.persistence.entities;
+package org.brava.infrastructure.persistence;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import org.brava.domain.enums.PaymentStatus;
+import org.brava.core.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class PaymentEntity extends PanacheEntityBase {
     @Column(name = "payee_id", nullable = false)
     public String payeeId;
 
+    @NotNull
     @Positive
     @Column(nullable = false, precision = 19, scale = 2)
     public BigDecimal amount;
@@ -44,7 +46,7 @@ public class PaymentEntity extends PanacheEntityBase {
     @Column(length = 500)
     public String description;
 
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     public PaymentStatus status;
@@ -52,10 +54,27 @@ public class PaymentEntity extends PanacheEntityBase {
     @Column(length = 500)
     public String message;
 
+    @NotNull
     @Column(name = "created_at", nullable = false, updatable = false)
     public LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at", nullable = false)
     public LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
 }
